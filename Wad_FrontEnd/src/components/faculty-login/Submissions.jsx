@@ -10,6 +10,7 @@ const Submissions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState(null); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,17 +23,25 @@ const Submissions = () => {
         setBudgets(response.data);
       } catch (err) {
         if (err.response) {
-          setError(`Error: ${err.response.data.message}`); // Improved error message
+          setError(`Error: ${err.response.data.message}`);
         } else {
-          setError('Failed to fetch budgets.'); // Fallback error message
+          setError('Failed to fetch budgets.');
         }
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchBudgets();
   }, []);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -42,12 +51,16 @@ const Submissions = () => {
     setSidebarOpen(false);
   };
 
+  // Function to handle the expansion of budget breakdown
+  const toggleExpand = (index) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
   return (
     <div className="d-flex flex-column min-vh-100 bg-light" onClick={closeSidebar}>
-      {/* Header */}
       <header className="d-flex justify-content-between align-items-center p-3 bg-white shadow-sm">
         <img src={logo} alt="CSE Department Logo" style={{ width: '150px' }} />
         <div className="position-relative">
@@ -62,7 +75,6 @@ const Submissions = () => {
             <BsListUl size={30} />
           </button>
 
-          {/* Sidebar */}
           {sidebarOpen && (
             <div
               className="bg-white border shadow-sm position-absolute end-0 mt-2 p-3"
@@ -70,24 +82,15 @@ const Submissions = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="d-flex flex-column">
-                <button
-                  className="btn btn-light d-flex align-items-center mb-3"
-                  onClick={() => navigate('/faculty-profile')}
-                >
+                <button className="btn btn-light d-flex align-items-center mb-3" onClick={() => navigate('/faculty-profile')}>
                   <BsPersonFill className="me-2" size={25} />
                   <span>Edit Profile</span>
                 </button>
-                <button
-                  className="btn btn-light d-flex align-items-center mb-3"
-                  onClick={() => navigate('/new-expense')}
-                >
+                <button className="btn btn-light d-flex align-items-center mb-3" onClick={() => navigate('/new-expense')}>
                   <BsFillFileCheckFill className="me-2" size={25} />
                   <span>New Expense</span>
                 </button>
-                <button
-                  className="btn btn-light d-flex align-items-center"
-                  onClick={() => navigate('/submissions')}
-                >
+                <button className="btn btn-light d-flex align-items-center" onClick={() => navigate('/submissions')}>
                   <BsFillFileCheckFill className="me-2" size={25} />
                   <span>Submissions</span>
                 </button>
@@ -97,36 +100,61 @@ const Submissions = () => {
         </div>
       </header>
 
-      {/* Submissions Content */}
-      <div className="d-flex flex-column align-items-center justify-content-center flex-grow-1 py-3">
-        <div className="card border-0 shadow w-75">
+      <div className="flex-column align-items-center justify-content-center flex-grow-1 py-2">
+        <div className="card border-0 shadow w-100" style={{ height: '620px' }}>
           <div className="card-body">
-            <h3 className="text-center mb-4">Accepted and Rejected Expenses</h3>
+            <h3 className="text-center mb-4">Submitted Expenses</h3>
             <table className="table table-bordered">
               <thead>
                 <tr>
                   <th>#</th>
                   <th>Event Name</th>
                   <th>Description</th>
+                  <th>Budget Proposal Date</th>
                   <th>Event Date</th>
                   <th>Amount</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {budgets.map((budget, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{budget.eventName}</td>
-                    <td>{budget.eventDescription}</td>                    
-                    <td>{budget.eventDate}</td>
-                    <td>₹{budget.totalBudget}</td>
-                    <td>
-                      <span className={`badge ${budget.status === 'accepted' ? 'bg-success' : budget.status === 'rejected' ? 'bg-danger' : 'bg-warning'}`}>
-                        {budget.status.charAt(0).toUpperCase() + budget.status.slice(1)}
-                      </span>
-                    </td>
-                  </tr>
+                  <React.Fragment key={index}>
+                    <tr>
+                      <td>{index + 1}</td>
+                      <td>{budget.eventName}</td>
+                      <td>{budget.eventDescription}</td>
+                      <td>{formatDate(budget.budgetProposalDate)}</td>
+                      <td>{formatDate(budget.eventDate)}</td>
+                      <td>₹{budget.totalBudget}</td>
+                      <td>
+                        <span className={`badge ${budget.status === 'Accepted' ? 'bg-success' : budget.status === 'Rejected' ? 'bg-danger' : 'bg-warning'}`}>
+                          {budget.status.charAt(0).toUpperCase() + budget.status.slice(1)}
+                        </span>
+                      </td>
+                      <td>
+                        <button className="btn btn-info btn-sm" onClick={() => toggleExpand(index)}>
+                          {expandedIndex === index ? 'Hide Details' : 'Show Details'}
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedIndex === index && (
+                      <tr>
+                        <td colSpan="8">
+                          <div className="p-2 bg-light">
+                            <h5>Budget Breakdown</h5>
+                            <ul>
+                              {budget.breakdown.map((item, i) => (
+                                <li key={i}>
+                                  {item.item}: ₹{item.cost}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
@@ -134,7 +162,6 @@ const Submissions = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-white py-3 text-center">
         <small>© 2024 CSE Department | All Rights Reserved</small>
       </footer>

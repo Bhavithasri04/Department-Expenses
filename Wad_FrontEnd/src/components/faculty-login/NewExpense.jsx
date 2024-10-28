@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap is imported
 import { BsFillFileArrowUpFill, BsListUl, BsBellFill,BsPersonFill } from 'react-icons/bs';
 import logo from '../../assets/Images/1.png'; 
-import budget from '../../assets/Images/new.png';
 
 const NewExpense = () => {
   const [userData, setUserData] = useState(null);
@@ -75,6 +74,7 @@ const NewExpense = () => {
         userId: userData._id,
         eventName,
         eventDescription,
+        budgetProposalDate,
         eventDate,
         totalBudget,
         breakdown,
@@ -161,7 +161,7 @@ const NewExpense = () => {
 
       {/* Form */}
       <div className="d-flex flex-column align-items-center justify-content-center flex-grow-1 py-3">
-        <div className="card border-0 shadow col-11"> {/* Adjusted width to accommodate table */}
+        <div className="card border-0 shadow col-11 w-95"> {/* Adjusted width to accommodate table */}
           <div className="card-body">
             <form onSubmit={handleSubmit}>
               <div className="mb-3">

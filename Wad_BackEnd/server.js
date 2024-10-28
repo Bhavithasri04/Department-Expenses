@@ -6,9 +6,6 @@ import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import authRoutes from './routes/auth.js';
 import eventRoutes from './routes/events.js';
-// import Proposal from './models/EventProposal.js'; // Ensure this path is correct
-// import authenticateJWT from './middleware/auth.js'; // Ensure this path is correct
-
 // Load environment variables from .env file
 config();
 

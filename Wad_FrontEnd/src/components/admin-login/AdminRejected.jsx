@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { BsFillFileCheckFill, BsListUl, BsPersonFill } from 'react-icons/bs';
+import { BsListUl, BsPersonFill, BsFileEarmarkTextFill, BsCheckSquareFill, BsFillXSquareFill } from 'react-icons/bs';
 import logo from '../../assets/Images/1.png';
 
 const AdminRejected = () => {
@@ -10,6 +10,7 @@ const AdminRejected = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState(null); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +34,20 @@ const AdminRejected = () => {
     
     fetchBudgets();
   }, [navigate]);
+
+  // Function to format the date to DD-MM-YYYY
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  // Function to handle the expansion of budget breakdown
+  const toggleExpand = (index) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -70,26 +85,21 @@ const AdminRejected = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="d-flex flex-column">
-                <button
-                  className="btn btn-light d-flex align-items-center mb-3"
-                  onClick={() => navigate('/admin-profile')}
-                >
+                <button className="btn btn-light d-flex align-items-center mb-3" onClick={() => navigate('/admin-profile')}>
                   <BsPersonFill className="me-2" size={25} />
                   <span>Profile</span>
                 </button>
-                <button
-                  className="btn btn-light d-flex align-items-center mb-3"
-                  onClick={() => navigate('/admin-approved')}
-                >
-                  <BsFillFileCheckFill className="me-2" size={25} /> {/* Correct icon import */}
+                <button className="btn btn-light d-flex align-items-center mb-3" onClick={() => navigate('/admin-approved')}>
+                  <BsCheckSquareFill className="me-2" size={25} />
                   <span>Admin Approved</span>
                 </button>
-                <button
-                  className="btn btn-light d-flex align-items-center mb-3"
-                  onClick={() => navigate('/admin-rejected')}
-                >
-                  <BsFillFileCheckFill className="me-2" size={25} /> {/* Correct icon import */}
+                <button className="btn btn-light d-flex align-items-center mb-3" onClick={() => navigate('/adminrejected')}>
+                  <BsFillXSquareFill className="me-2" size={25} />
                   <span>Admin Rejected</span>
+                </button>
+                <button className="btn btn-light d-flex align-items-center mb-3" onClick={() => navigate('/report')}>
+                  <BsFileEarmarkTextFill className="me-2" size={25} />
+                  <span>Reports</span>
                 </button>
               </div>
             </div>
@@ -98,8 +108,8 @@ const AdminRejected = () => {
       </header>
 
       {/* Submissions Content */}
-      <div className="d-flex flex-column align-items-center justify-content-center flex-grow-1 py-3">
-        <div className="card border-0 shadow w-75">
+      <div className="flex-column align-items-center justify-content-center flex-grow-1 py-2">
+        <div className="card border-0 shadow w-100" style={{ height: '620px' }}>
           <div className="card-body">
             <h3 className="text-center mb-4">Rejected Expenses</h3>
             <table className="table table-bordered">
@@ -108,23 +118,49 @@ const AdminRejected = () => {
                   <th>#</th>
                   <th>Event Name</th>
                   <th>Description</th>
+                  <th>Budget Proposal Date</th> 
                   <th>Event Date</th>
                   <th>Amount</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {budgets.map((budget, index) => (
-                  <tr key={`${budget.id}-${index}`}>
-                    <td>{index + 1}</td>
-                    <td>{budget.eventName}</td>
-                    <td>{budget.eventDescription}</td>                    
-                    <td>{budget.eventDate}</td>
-                    <td>₹{budget.totalBudget}</td>
-                    <td>
-                      <span className="badge bg-danger">Rejected</span> {/* Correct status */}
-                    </td>
-                  </tr>
+                  <React.Fragment key={index}>
+                    <tr>
+                      <td>{index + 1}</td>
+                      <td>{budget.eventName}</td>
+                      <td>{budget.eventDescription}</td> 
+                      <td>{formatDate(budget.budgetProposalDate)}</td>                   
+                      <td>{formatDate(budget.eventDate)}</td>
+                      <td>₹{budget.totalBudget}</td>
+                      <td>
+                        <span className="badge bg-danger">Rejected</span> {/* Correct status */}
+                      </td>
+                      <td>
+                        <button className="btn btn-info btn-sm" onClick={() => toggleExpand(index)}>
+                          {expandedIndex === index ? 'Hide Details' : 'Show Details'}
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedIndex === index && (
+                      <tr>
+                        <td colSpan="8">
+                          <div className="p-2 bg-light">
+                            <h5>Budget Breakdown</h5>
+                            <ul>
+                              {budget.breakdown.map((item, i) => (
+                                <li key={i}>
+                                  {item.item}: ₹{item.cost}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

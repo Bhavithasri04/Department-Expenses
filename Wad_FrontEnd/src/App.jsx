@@ -12,7 +12,6 @@ import AdminProfile from './components/admin-login/AdminProfile';
 import AdminApproved from './components/admin-login/AdminApproved';
 import AdminRejected from './components/admin-login/AdminRejected';
 import Report from './components/admin-login/Report';
-
 function App() {
   return (
     <Router>
@@ -29,10 +28,8 @@ function App() {
         <Route path="/admin-approved" element={<AdminApproved />} />
         <Route path="/report" element={<Report />} />
         <Route path="/adminrejected" element={<AdminRejected />} />
-
       </Routes>
     </Router>
   );
 }
-
 export default App;

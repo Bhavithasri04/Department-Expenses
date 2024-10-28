@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap is imported
-import { BsFillFileArrowUpFill, BsListUl, BsPersonFill } from 'react-icons/bs';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { BsListUl, BsPersonFill, BsFileEarmarkTextFill, BsCheckSquareFill, BsFillXSquareFill, BsFillArrowRightSquareFill } from 'react-icons/bs';
 import logo from '../../assets/Images/1.png';
 
 const AdminProfile = () => {
@@ -10,6 +10,7 @@ const AdminProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState(null);
   const navigate = useNavigate();
 
   // Fetching budget proposals from the backend API
@@ -17,6 +18,7 @@ const AdminProfile = () => {
     const fetchProposals = async () => {
       try {
         const token = localStorage.getItem('token');
+        
         const response = await axios.get(`http://localhost:5000/api/events/proposals`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -34,36 +36,36 @@ const AdminProfile = () => {
     fetchProposals();
   }, []);
 
- // Accept budget proposal
-const handleAcceptProposal = async (id) => {
-  try {
-    const token = localStorage.getItem('token');
-    await axios.put(
-      `http://localhost:5000/api/events/proposals/${id}/accepted`,  {}, 
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-    alert('Proposal accepted!');
-    setProposals(proposals.filter(proposal => proposal._id !== id)); 
-  } catch (err) {
-    setError('Failed to accept proposal.');
-  }
-};
+  // Accept budget proposal
+  const handleAcceptProposal = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `http://localhost:5000/api/events/proposals/${id}/accepted`, {}, 
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      alert('Proposal accepted!');
+      setProposals(proposals.filter(proposal => proposal._id !== id)); 
+    } catch (err) {
+      setError('Failed to accept proposal.');
+    }
+  };
 
-// Reject budget proposal
-const handleRejectProposal = async (id) => {
-  try {
-    const token = localStorage.getItem('token');
-    await axios.put(`http://localhost:5000/api/events/proposals/${id}/rejected`, {} ,{
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    alert('Proposal rejected!');
-    setProposals(proposals.filter(proposal => proposal._id !== id));
-  } catch (err) {
-    setError('Failed to reject proposal.');
-  }
-};
+  // Reject budget proposal
+  const handleRejectProposal = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`http://localhost:5000/api/events/proposals/${id}/rejected`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('Proposal rejected!');
+      setProposals(proposals.filter(proposal => proposal._id !== id));
+    } catch (err) {
+      setError('Failed to reject proposal.');
+    }
+  };
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -71,6 +73,16 @@ const handleRejectProposal = async (id) => {
 
   const closeSidebar = () => {
     setSidebarOpen(false);
+  };
+
+  const toggleExpand = (index) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Remove token from local storage
+    navigate('/admin-login'); // Redirect to login page
   };
 
   if (loading) return <p>Loading...</p>;
@@ -112,15 +124,29 @@ const handleRejectProposal = async (id) => {
                   className="btn btn-light d-flex align-items-center mb-3"
                   onClick={() => navigate('/admin-approved')}
                 >
-                  <BsFillFileArrowUpFill className="me-2" size={25} />
+                  <BsCheckSquareFill className="me-2" size={25} /> 
                   <span>Admin Approved</span>
                 </button>
                 <button
                   className="btn btn-light d-flex align-items-center mb-3"
                   onClick={() => navigate('/adminrejected')}
                 >
-                  <BsFillFileArrowUpFill className="me-2" size={25} />
+                  <BsFillXSquareFill className="me-2" size={25} /> 
                   <span>Admin Rejected</span>
+                </button>
+                <button
+                  className="btn btn-light d-flex align-items-center mb-3"
+                  onClick={() => navigate('/report')}
+                >
+                  <BsFileEarmarkTextFill className="me-2" size={25} /> 
+                  <span>Reports</span>
+                </button>
+                <button
+                  className="btn btn-danger d-flex align-items-center mb-3"
+                  onClick={handleLogout} 
+                >
+                  <BsFillArrowRightSquareFill className="me-2" size={25} />
+                  <span>Logout</span>
                 </button>
               </div>
             </div>
@@ -129,26 +155,45 @@ const handleRejectProposal = async (id) => {
       </header>
 
       {/* Proposal List */}
-      <div className="d-flex flex-column align-items-center justify-content-center flex-grow-1 py-3">
-        <div className="card border-0 shadow col-11">
+      <div className="flex-column align-items-center justify-content-center flex-grow-1 py-3">
+        <div className="card border-0 shadow col-11 w-100">
           <div className="card-body">
             <h3>Pending Proposals</h3>
             <ul className="list-group">
-              {proposals.map((proposal) => (
-                <li key={proposal._id} className="list-group-item">
-                  <h5>{proposal.eventName}</h5>
-                  <p>{proposal.eventDescription}</p>
-                  <p><strong>Event Date:</strong> {new Date(proposal.eventDate).toLocaleDateString()}</p>
-                  <p><strong>Total Budget:</strong> ₹{proposal.totalBudget}</p>
-                  <div className="d-flex justify-content-end">
-                    <button className="btn btn-success me-2" onClick={() => handleAcceptProposal(proposal._id)}>
-                      Accept
+              {proposals.map((proposal, index) => (
+                <React.Fragment key={proposal._id}>
+                  <li className="list-group-item">
+                    <h5>{proposal.eventName}</h5>
+                    <p>{proposal.eventDescription}</p>
+                    <p><strong>Event Date:</strong> {new Date(proposal.eventDate).toLocaleDateString()}</p>
+                    <p><strong>Total Budget:</strong> ₹{proposal.totalBudget}</p>
+                    <div className="d-flex justify-content-end">
+                      <button className="btn btn-success me-2" onClick={() => handleAcceptProposal(proposal._id)}>
+                        Accept
+                      </button>
+                      <button className="btn btn-danger" onClick={() => handleRejectProposal(proposal._id)}>
+                        Reject
+                      </button>
+                    </div>
+                    {/* Toggle details for budget breakdown */}
+                    <button className="btn btn-info btn-sm mt-2" onClick={() => toggleExpand(index)}>
+                      {expandedIndex === index ? 'Hide Details' : 'Show Details'}
                     </button>
-                    <button className="btn btn-danger" onClick={() => handleRejectProposal(proposal._id)}>
-                      Reject
-                    </button>
-                  </div>
-                </li>
+                  </li>
+                  {/* Expanded details for budget breakdown */}
+                  {expandedIndex === index && (
+                    <li className="list-group-item">
+                      <h5>Budget Breakdown</h5>
+                      <ul>
+                        {proposal.breakdown.map((item, i) => (
+                          <li key={i}>
+                            {item.item}: ₹{item.cost}
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  )}
+                </React.Fragment>
               ))}
             </ul>
           </div>
@@ -162,4 +207,5 @@ const handleRejectProposal = async (id) => {
     </div>
   );
 };
-export  default AdminProfile;
+
+export default AdminProfile;
