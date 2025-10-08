@@ -1,0 +1,156 @@
+/* src/components/admin-login/AdminDashboard.css */
+
+.admin-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #f0f2f5;
+    font-family: 'Inter', sans-serif;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1B4A56;
+    padding: 0 30px;
+    height: 64px;
+    color: white;
+}
+
+.header-logo img {
+    height: 40px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.header-icon {
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.logout-btn-admin {
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-body {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.admin-sidebar {
+    width: 240px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-right: 1px solid #e8e8e8;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.sidebar-link:hover {
+    background-color: #f0f2f5;
+}
+.sidebar-link.active {
+    background-color: #e6f7ff;
+    color: #1890ff;
+}
+.sidebar-icon {
+    margin-right: 15px;
+    font-size: 1.2rem;
+}
+
+.admin-main-content {
+    flex-grow: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.admin-main-content h4 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.overview-cards {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e8e8e8;
+}
+.card.large {
+    background-color: #e6f7ff;
+    border-color: #91d5ff;
+}
+.card.action {
+    background-color: #fffbe6;
+    border-color: #ffe58f;
+}
+
+.card label {
+    display: block;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.card span {
+    font-size: 2rem;
+    font-weight: 600;
+    display: block;
+}
+
+.card small {
+    display: block;
+    color: #888;
+    margin-top: 5px;
+}
+
+.analysis-charts {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.chart-card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e8e8e8;
+}
+
+.chart-card h5 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}

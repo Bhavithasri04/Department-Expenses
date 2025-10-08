@@ -1,122 +1,151 @@
+// Wad_BackEnd/routes/auth.js
+
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import authenticateJWT from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Signup Route
-router.post('/signup', async (req, res) => {
-  const { fullName, phoneNumber, email, gender, designation, password, dateOfBirth } = req.body;
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ fullName, phoneNumber, email, gender, designation, password: hashedPassword, dateOfBirth });
-    await newUser.save();
-    res.status(201).json({ message: 'User created successfully', user: newUser });
-  } catch (error) {
-    res.status(500).json({ message: 'Error during signup', error });
-  }
-});
-
-// Login Route
+// --- PUBLIC LOGIN ROUTE (NO MIDDLEWARE) ---
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+    const { employeeId, password } = req.body;
+    try {
+        const user = await User.findOne({ employeeId });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        if (user.status === 'Disabled') {
+            return res.status(403).json({ message: 'Your account has been disabled.' });
+        }
+
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(200).json({ token, role: user.role, forcePasswordChange: user.forcePasswordChange });
+    } catch (error) {
+        res.status(500).json({ message: 'Error during login' });
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ token, user: { ...user._doc, password: undefined } }); // Exclude password from response
-  } catch (error) {
-    res.status(500).json({ message: 'Error during login', error });
-  }
 });
 
-// Get User Profile Route
-router.get('/profile', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password'); // Exclude password from the response
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+// --- PROTECTED PROFILE ROUTE (USES MIDDLEWARE) ---
+router.get('/profile', authenticateJWT, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching profile' });
     }
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching user profile', error });
-  }
+});
+// PUT - Update the current user's own profile (e.g., for password change)
+router.put('/profile', authenticateJWT, async (req, res) => {
+    // The user's ID comes from the JWT token after passing through the middleware
+    const userId = req.user.id;
+    const { password, forcePasswordChange } = req.body;
+
+    // We must have a new password to proceed
+    if (!password) {
+        return res.status(400).json({ message: 'Password is required' });
+    }
+
+    try {
+        // Find the user in the database
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Hash the new password before saving it
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+
+        // Update the forcePasswordChange flag
+        user.forcePasswordChange = forcePasswordChange;
+
+        // Save the updated user document
+        await user.save();
+
+        res.status(200).json({ message: 'Profile updated successfully' });
+
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ message: 'Error updating profile' });
+    }
+});
+// --- PROTECTED USER MANAGEMENT ROUTES ---
+
+// GET all users
+router.get('/users', authenticateJWT, async (req, res) => {
+    if (req.user.role !== 'Admin') return res.status(403).json({ message: 'Access denied' });
+    try {
+        const users = await User.find({}).select('-password');
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching users' });
+    }
 });
 
-// Update User Profile Route
-router.put('/profile', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
+// POST - Create a new user
+router.post('/users', authenticateJWT, async (req, res) => {
+    if (req.user.role !== 'Admin') return res.status(403).json({ message: 'Access denied' });
+    const { fullName, email, employeeId, department, role } = req.body;
+    try {
+        const existingUser = await User.findOne({ $or: [{ email }, { employeeId }] });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User with this email or Employee ID already exists' });
+        }
+        
+        // --- THIS IS WHERE THE DEFAULT PASSWORD IS SET ---
+        const defaultPassword = "password123";
+        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const updatedUser = await User.findByIdAndUpdate(
-      decoded.id,
-      req.body,
-      { new: true, runValidators: true }
-    ).select('-password'); // Exclude password
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+        const newUser = new User({
+            fullName, email, employeeId, department, role,
+            password: hashedPassword,
+            forcePasswordChange: true,
+            phoneNumber: '0000000000',
+            gender: 'Not Specified',
+            designation: role,
+            dateOfBirth: new Date()
+        });
+        await newUser.save();
+        res.status(201).json(newUser);
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating user' });
     }
-
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating user profile', error });
-  }
 });
 
-// Change Password Route
-router.put('/change-password', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-  const { currentPassword, newPassword } = req.body;
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+// PUT - Update user status
+router.put('/users/:id/status', authenticateJWT, async (req, res) => {
+    if (req.user.role !== 'Admin') return res.status(403).json({ message: 'Access denied' });
+    try {
+        const { status } = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        user.status = status;
+        await user.save();
+        res.status(200).json({ message: 'User status updated' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating status' });
     }
+});
 
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Current password is incorrect' });
+// DELETE - Delete a user
+router.delete('/users/:id', authenticateJWT, async (req, res) => {
+    if (req.user.role !== 'Admin') return res.status(403).json({ message: 'Access denied' });
+    try {
+        const deletedUser = await User.findByIdAndDelete(req.params.id);
+        if (!deletedUser) return res.status(404).json({ message: 'User not found' });
+        res.status(200).json({ message: 'User deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting user' });
     }
-
-    // Hash the new password
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedNewPassword;
-    await user.save();
-
-    res.status(200).json({ message: 'Password changed successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error changing password', error });
-  }
 });
 
 export default router;

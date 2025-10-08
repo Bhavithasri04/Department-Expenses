@@ -1,0 +1,91 @@
+/* src/components/admin-login/AdminApprovals.css */
+
+.approvals-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+.approvals-container h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.approval-tabs {
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 25px;
+}
+
+.approval-tabs button {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #555;
+    border-bottom: 3px solid transparent;
+}
+
+.approval-tabs button.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+}
+
+.proposals-list h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.list-header, .list-row {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 1fr 1fr 2fr;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.list-header {
+    font-weight: 600;
+    color: #666;
+    background-color: #fafafa;
+}
+
+.list-row:last-child {
+    border-bottom: none;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.action-buttons button {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.action-approve { background-color: #e6f7f2; color: #00875a; }
+.action-reject { background-color: #fff1f0; color: #ff4d4f; }
+.action-review { background-color: #f0f2f5; color: #555; }
+
+/* Review Modal specific styles */
+.review-item {
+    grid-template-columns: 3fr 1fr !important;
+}
+
+.itemized-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background-color: #fafafa;
+    border-top: 1px solid #e0e0e0;
+}

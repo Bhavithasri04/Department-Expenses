@@ -1,0 +1,81 @@
+/* src/components/faculty-login/Profile.css */
+
+.profile-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+.profile-container h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.profile-tabs {
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 25px;
+}
+
+.profile-tabs button {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #555;
+    border-bottom: 3px solid transparent;
+}
+
+.profile-tabs button.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+}
+
+.profile-details-view h4,
+.profile-details-edit h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.details-grid label {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.details-grid p {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.details-grid input, .details-grid select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.save-btn {
+    margin-top: 30px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+}

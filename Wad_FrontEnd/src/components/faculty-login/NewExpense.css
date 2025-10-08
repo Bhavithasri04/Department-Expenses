@@ -1,0 +1,150 @@
+/* src/components/faculty-login/NewExpense.css */
+
+.proposal-form-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+.proposal-form-container h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.itemized-list {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.item-header, .item-row {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+}
+
+.item-header {
+    background-color: #f9f9f9;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+}
+
+.item-row {
+    border-bottom: 1px solid #eee;
+}
+
+.item-row:last-child {
+    border-bottom: none;
+}
+
+.item-row input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.subtotal {
+    font-weight: 500;
+    text-align: right;
+    padding-right: 10px;
+}
+
+.remove-btn {
+    background: none;
+    border: 1px solid #ff4d4f;
+    color: #ff4d4f;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-item-btn {
+    margin-top: 15px;
+    background-color: #1B4A56;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.total-amount {
+    text-align: right;
+    font-size: 1.2rem;
+    margin-top: 20px;
+}
+
+.upload-box {
+    border: 2px dashed #ccc;
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.upload-box span {
+    display: block;
+    margin-top: 10px;
+    color: #555;
+}
+
+.upload-box input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.form-actions {
+    margin-top: 30px;
+    text-align: left;
+}
+
+.submit-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}

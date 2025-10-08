@@ -1,0 +1,180 @@
+/* src/components/admin-login/UserManagement.css */
+
+.user-management-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.page-header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.add-user-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.page-description {
+    color: #555;
+    margin-bottom: 25px;
+}
+
+.user-list-container {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.user-list-header, .user-list-row {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 1fr 1fr 2fr;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.user-list-header {
+    font-weight: 600;
+    color: #666;
+    background-color: #fafafa;
+}
+.user-list-row:last-child {
+    border-bottom: none;
+}
+
+.status-badge.status-active {
+    background-color: #e6f7f2;
+    color: #00875a;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-badge.status-disabled {
+    background-color: #fff1f0;
+    color: #ff4d4f;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.action-buttons-users {
+    display: flex;
+    gap: 10px;
+}
+
+.action-buttons-users .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.action-btn.edit-btn { color: #007bff; }
+.action-btn.disable-btn, .action-btn.delete-btn { color: #ff4d4f; }
+.action-btn.enable-btn { color: #00875a; }
+
+
+/* Modal Styles from AdminApprovals.css - can be reused */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    width: 500px;
+    max-width: 90%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h4 { margin: 0; }
+.close-btn { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #888; }
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-body .form-group {
+    margin-bottom: 15px;
+}
+
+.modal-body .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.modal-body .form-group input,
+.modal-body .form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.modal-footer {
+    padding: 15px 25px;
+    border-top: 1px solid #e0e0e0;
+    text-align: right;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.modal-footer .cancel-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.modal-footer .submit-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}

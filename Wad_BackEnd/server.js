@@ -1,64 +1,46 @@
-import express, { json } from 'express';
-import { connect } from 'mongoose';
+// Wad_BackEnd/server.js
+
+import express from 'express';
 import cors from 'cors';
-import bodyParser from 'body-parser';
-import jwt from 'jsonwebtoken';
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+
+// Import your route files
 import authRoutes from './routes/auth.js';
 import eventRoutes from './routes/events.js';
-// Load environment variables from .env file
-config();
+import budgetRoutes from './routes/budget.js';
+
+// --- This MUST be at the very top ---
+dotenv.config();
 
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: 'http://localhost:5173', // Allow requests from this origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
-app.use(json());
-app.use(bodyParser.json()); // Parse JSON bodies
+app.use(cors());
+app.use(express.json());
 
-// Define routes
-app.use('/api/auth', authRoutes); // Auth routes
-app.use('/api/events', eventRoutes); // Event routes
-
-// Hardcoded admin credentials (for demonstration purposes)
-const adminCredentials = {
-  email: 'admin@gmail.com',
-  password: 'Admin',
-  dob: '2000-01-01', // Change format to YYYY-MM-DD for consistency
-};
-
-// POST /api/admin/login
-app.post('/api/admin/login', (req, res) => {
-  const { email, password, dob } = req.body;
-
-  // Check if the credentials match
-  if (
-    email === adminCredentials.email &&
-    password === adminCredentials.password &&
-    dob === adminCredentials.dob // Use dob directly for comparison
-  ) {
-    // Generate a token
-    const token = jwt.sign({ email }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
-
-    return res.status(200).json({ token });
-  } else {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-});
-
-// Connect to MongoDB
-connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch((error) => console.error('MongoDB connection error:', error));
+// --- CORRECTED API ROUTES ---
+// We tell the app to use the route files directly.
+// The security middleware is now correctly handled *inside* the route files, not here.
+app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/budget', budgetRoutes);
 
 
-
-// Start the server
+// --- CORRECTED DATABASE CONNECTION ---
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+    console.error("FATAL ERROR: MONGO_URI is not defined in your .env file.");
+    process.exit(1);
+}
+
+// The deprecated options have been removed for a clean connection.
+mongoose.connect(MONGO_URI)
+    .then(() => {
+        app.listen(PORT, () => console.log(`Server is running successfully on port: ${PORT}`));
+    })
+    .catch((error) => {
+        console.error('MongoDB connection error:', error.message);
+    });

@@ -1,0 +1,114 @@
+/* src/components/admin-login/BudgetManagement.css */
+
+.budget-management-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+.budget-management-container > p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 25px;
+}
+
+.budget-section {
+    margin-bottom: 40px;
+}
+
+.budget-section h4 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.total-budget-form {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.input-group span {
+    padding: 0 12px;
+    background-color: #f9f9f9;
+    font-weight: 500;
+    border-right: 1px solid #ccc;
+}
+
+.input-group input {
+    border: none;
+    outline: none;
+    padding: 8px 12px;
+}
+
+.update-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.category-list, .faculty-list {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.category-header, .category-row, .faculty-header, .faculty-row {
+    display: grid;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+.category-header, .faculty-header {
+    grid-template-columns: 2fr 1.5fr 1.5fr;
+    font-weight: 600;
+    background-color: #fafafa;
+}
+.category-row {
+    grid-template-columns: 2fr 1.5fr 1.5fr;
+}
+.faculty-header, .faculty-row {
+     grid-template-columns: 1.5fr 1.5fr 1.5fr;
+}
+.category-row:last-child, .faculty-row:last-child {
+    border-bottom: none;
+}
+.category-row.add-new {
+    grid-template-columns: 2fr 1.5fr auto;
+}
+.add-btn {
+    background: none;
+    border: 1px solid #007bff;
+    color: #007bff;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.update-btn.category-update {
+    float: right;
+}
+
+.search-faculty {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+}

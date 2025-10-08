@@ -1,301 +1,169 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+// src/components/faculty-login/NewExpense.jsx
+
+import React, { useState, useEffect } from 'react';
+// 1. IMPORT the new apiClient
+import apiClient from '/src/api/apiClient.js';
 import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap is imported
-import { BsFillFileArrowUpFill, BsListUl, BsBellFill,BsPersonFill } from 'react-icons/bs';
-import logo from '../../assets/Images/1.png'; 
+import { BsGrid, BsFileEarmarkArrowUp, BsCollection, BsPerson, BsSearch, BsBell, BsBoxArrowRight, BsUpload } from 'react-icons/bs';
+import '/src/components/faculty-login/NewExpense.css';
+import logo from '/src/assets/Images/slogo.png';
 
 const NewExpense = () => {
-  const [userData, setUserData] = useState(null);
-  const [eventName, setEventName] = useState('');
-  const [eventDescription, setEventDescription] = useState('');
-  const [eventDate, setEventDate] = useState(''); // New state for event date
-  const [budgetProposalDate, setBudgetProposalDate] = useState(''); // New state for budget proposal date
-  const [totalBudget, setTotalBudget] = useState(''); // New state for total budget
-  const [breakdown, setBreakdown] = useState([{ item: '', cost: '' }]); // State for budget breakdown
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    
+    const [proposalTitle, setProposalTitle] = useState('');
+    const [associatedProject, setAssociatedProject] = useState('');
+    const [expenseCategory, setExpenseCategory] = useState('');
+    const [justification, setJustification] = useState('');
+    const [items, setItems] = useState([{ item: '', costPerUnit: '', quantity: 1 }]);
+    const [totalAmount, setTotalAmount] = useState(0);
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const profileResponse = await axios.get('http://localhost:5000/api/auth/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setUserData(profileResponse.data);
-      } catch (err) {
-        setError('Failed to fetch user data.');
-      } finally {
-        setLoading(false);
-      }
+    useEffect(() => {
+        const total = items.reduce((acc, current) => {
+            const cost = parseFloat(current.costPerUnit) || 0;
+            const quantity = parseInt(current.quantity, 10) || 0;
+            return acc + (cost * quantity);
+        }, 0);
+        setTotalAmount(total);
+    }, [items]);
+
+    const handleItemChange = (index, event) => {
+        const newItems = [...items];
+        newItems[index][event.target.name] = event.target.value;
+        setItems(newItems);
     };
 
-    fetchUserProfile();
-  }, []);
+    const addItem = () => {
+        setItems([...items, { item: '', costPerUnit: '', quantity: 1 }]);
+    };
 
-  const handleBreakdownChange = (index, event) => {
-    const newBreakdown = [...breakdown];
-    newBreakdown[index][event.target.name] = event.target.value;
-    setBreakdown(newBreakdown);
-  };
+    const removeItem = (index) => {
+        const newItems = items.filter((_, i) => i !== index);
+        setItems(newItems);
+    };
 
-  const addBreakdownRow = () => {
-    const lastRow = breakdown[breakdown.length - 1];
-    // Check if the last row is complete
-    if (lastRow.item && lastRow.cost) {
-      setBreakdown([...breakdown, { item: '', cost: '' }]);
-    } else {
-      alert('Please complete the current item before adding a new one.');
-    }
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const proposalData = {
+                eventName: proposalTitle,
+                eventDescription: justification,
+                budgetProposalDate: new Date().toISOString(),
+                eventDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
+                totalBudget: totalAmount,
+                breakdown: items.map(i => ({
+                    item: i.item,
+                    cost: (parseFloat(i.costPerUnit) || 0) * (parseInt(i.quantity, 10) || 0)
+                }))
+            };
+            
+            // 2. SIMPLIFY the API call
+            await apiClient.post('/events/proposals', proposalData);
+            
+            alert('Proposal submitted successfully!');
+            navigate('/faculty-dashboard');
+        } catch (err) {
+            console.error('Failed to submit proposal', err);
+            alert('Failed to submit proposal. Please check the console for details.');
+        }
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    // Validate that the event date is after the budget proposal date
-    if (new Date(eventDate) <= new Date(budgetProposalDate)) {
-      setError('Event date must be after the budget proposal date.');
-      return;
-    }
-  
-    // Log user data and token for debugging
-    console.log('Submitting proposal with user ID:', userData ? userData._id : 'No user data');
-    console.log('Token:', localStorage.getItem('token'));
-  
-    try {
-      const token = localStorage.getItem('token');
-      
-      const response = await axios.post('http://localhost:5000/api/events/proposals', {
-        userId: userData._id,
-        eventName,
-        eventDescription,
-        budgetProposalDate,
-        eventDate,
-        totalBudget,
-        breakdown,
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      // Log the response for debugging
-      console.log('Response from server:', response.data);
-      
-      alert('Expense proposal submitted successfully!');
-      navigate('/faculty-profile');
-    } catch (err) {
-      console.error('Submission error:', err); // Log the error for debugging
-      setError('Failed to submit expense proposal. ' + (err.response?.data?.message || ''));
-    }
-  };
-  
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/');
+    };
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+    return (
+        <div className="dashboard-container">
+            <aside className="sidebar">
+                <div className="sidebar-header">
+                    <img src={logo} alt="Logo" className="sidebar-logo" />
+                </div>
+                <nav className="sidebar-nav">
+                    <a href="/faculty-dashboard" className="nav-item"><BsGrid className="nav-icon" /> Dashboard</a>
+                    <a href="/new-expense" className="nav-item active"><BsFileEarmarkArrowUp className="nav-icon" /> Submit Proposal</a>
+                    <a href="/submissions" className="nav-item"><BsCollection className="nav-icon" /> My Proposals</a>
+                    <a href="/faculty-profile" className="nav-item"><BsPerson className="nav-icon" /> Profile & Settings</a>
+                </nav>
+            </aside>
+            <main className="main-content">
+                <header className="main-header">
+                    <nav className="header-nav">
+                        <a href="/faculty-dashboard" className="header-nav-item">Dashboard</a>
+                        <a href="/new-expense" className="header-nav-item active">Submit Proposal</a>
+                        <a href="/submissions" className="header-nav-item">My Proposals</a>
+                        <a href="/faculty-profile" className="header-nav-item">Profile</a>
+                    </nav>
+                    <div className="header-actions">
+                        <BsSearch className="action-icon" />
+                        <BsBell className="action-icon" />
+                        <button className="logout-btn" onClick={handleLogout}><BsBoxArrowRight /> Logout</button>
+                    </div>
+                </header>
+                <section className="content-body">
+                    <div className="proposal-form-container">
+                        <h3>Submit New Budget Proposal</h3>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label>Proposal Title</label>
+                                <input type="text" value={proposalTitle} onChange={(e) => setProposalTitle(e.target.value)} placeholder="e.g., Upgrade Research Lab Equipment" required />
+                            </div>
+                            <div className="form-group">
+                                <label>Associated Project (Optional)</label>
+                                <input type="text" value={associatedProject} onChange={(e) => setAssociatedProject(e.target.value)} placeholder="e.g., AI Research Initiative Phase 2" />
+                            </div>
+                            <div className="form-group">
+                                <label>Expense Category</label>
+                                <input type="text" value={expenseCategory} onChange={(e) => setExpenseCategory(e.target.value)} placeholder="e.g., Lab Equipment" required />
+                            </div>
+                            <div className="form-group">
+                                <label>Detailed Justification</label>
+                                <textarea value={justification} onChange={(e) => setJustification(e.target.value)} placeholder="Provide a comprehensive justification for this budget request..." required rows="4"></textarea>
+                            </div>
 
-  const closeSidebar = () => {
-    setSidebarOpen(false);
-  };
+                            <h4>Itemized List</h4>
+                            <div className="itemized-list">
+                                <div className="item-header">
+                                    <div>Item</div>
+                                    <div>Cost/Unit</div>
+                                    <div>Quantity</div>
+                                    <div>Subtotal</div>
+                                    <div>Action</div>
+                                </div>
+                                {items.map((item, index) => (
+                                    <div key={index} className="item-row">
+                                        <input type="text" name="item" value={item.item} onChange={(e) => handleItemChange(index, e)} placeholder="Item Description" required />
+                                        <input type="number" name="costPerUnit" value={item.costPerUnit} onChange={(e) => handleItemChange(index, e)} placeholder="0.00" required />
+                                        <input type="number" name="quantity" value={item.quantity} onChange={(e) => handleItemChange(index, e)} placeholder="1" required />
+                                        <div className="subtotal">₹{((parseFloat(item.costPerUnit) || 0) * (parseInt(item.quantity, 10) || 0)).toFixed(2)}</div>
+                                        <button type="button" className="remove-btn" onClick={() => removeItem(index)}>Remove</button>
+                                    </div>
+                                ))}
+                            </div>
+                            <button type="button" className="add-item-btn" onClick={addItem}>+ Add Item</button>
+                            
+                            <div className="total-amount">
+                                <strong>Total Amount: ₹{totalAmount.toFixed(2)}</strong>
+                            </div>
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
-
-  return (
-    <div className="d-flex flex-column min-vh-100 bg-light" onClick={closeSidebar}>
-      {/* Header */}
-      <header className="d-flex justify-content-between align-items-center p-3 bg-white shadow-sm">
-        <img src={logo} alt="CSE Department Logo" style={{ width: '150px' }} />
-        <div className="position-relative">
-          <button
-            className="btn d-flex align-items-center justify-content-center"
-            style={{ backgroundColor: '#ff7e39', color: 'white', padding: '0.5rem 1rem' }}
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleSidebar();
-            }}
-          >
-            <BsListUl size={30} />
-          </button>
-
-          {/* Sidebar */}
-          {sidebarOpen && (
-            <div
-              className="bg-white border shadow-sm position-absolute end-0 mt-2 p-3"
-              style={{ width: '200px', zIndex: 1050 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="d-flex flex-column">
-                <button
-                  className="btn btn-light d-flex align-items-center mb-3"
-                  onClick={() => navigate('/faculty-profile')}
-                >
-                  <BsPersonFill className="me-2" size={25} />
-                  <span>Profile</span>
-                </button>
-                <button
-                  className="btn btn-light d-flex align-items-center mb-3"
-                  onClick={() => navigate('/new-expense')}
-                >
-                  <BsFillFileArrowUpFill className="me-2" size={25} />
-                  <span>New Expense</span>
-                </button>
-                <button
-                  className="btn btn-light d-flex align-items-center"
-                  onClick={() => navigate('/submissions')}
-                >
-                  <BsFillFileArrowUpFill className="me-2" size={25} />
-                  <span>Submissions</span>
-                </button>
-              </div>
-            </div>
-          )}
+                            <div className="form-group">
+                                <label>Attach Quotes/Invoices (Optional)</label>
+                                <div className="upload-box">
+                                    <BsUpload />
+                                    <span>Upload</span>
+                                    <input type="file" />
+                                </div>
+                            </div>
+                            
+                            <div className="form-actions">
+                                <button type="submit" className="submit-btn">Submit Proposal</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </main>
         </div>
-      </header>
-
-      {/* Form */}
-      <div className="d-flex flex-column align-items-center justify-content-center flex-grow-1 py-3">
-        <div className="card border-0 shadow col-11 w-95"> {/* Adjusted width to accommodate table */}
-          <div className="card-body">
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="eventName" className="form-label">Event Name</label>
-                <input
-                  type="text"
-                  id="eventName"
-                  className="form-control"
-                  value={eventName}
-                  onChange={(e) => setEventName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="eventDescription" className="form-label">Event Description</label>
-                <textarea
-                  id="eventDescription"
-                  className="form-control"
-                  value={eventDescription}
-                  onChange={(e) => setEventDescription(e.target.value)}
-                  required
-                  rows="3"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="budgetProposalDate" className="form-label">Budget Proposal Date</label>
-                <input
-                  type="date"
-                  id="budgetProposalDate"
-                  className="form-control"
-                  value={budgetProposalDate}
-                  onChange={(e) => setBudgetProposalDate(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="eventDate" className="form-label">Event Date</label>
-                <input
-                  type="date"
-                  id="eventDate"
-                  className="form-control"
-                  value={eventDate}
-                  onChange={(e) => setEventDate(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="totalBudget" className="form-label">Expected Total Budget (₹)</label>
-                <input
-                  type="number"
-                  id="totalBudget"
-                  className="form-control"
-                  value={totalBudget}
-                  onChange={(e) => setTotalBudget(e.target.value)}
-                  required
-                />
-              </div>
-
-              {/* Breakdown Budget Table */}
-              <div className="mb-3">
-                <label className="form-label">Breakdown Budget</label>
-                <table className="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th>Cost (₹)</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {breakdown.map((row, index) => (
-                      <tr key={index}>
-                        <td>
-                          <input
-                            type="text"
-                            name="item"
-                            className="form-control"
-                            value={row.item}
-                            onChange={(e) => handleBreakdownChange(index, e)}
-                            required
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            name="cost"
-                            className="form-control"
-                            value={row.cost}
-                            onChange={(e) => handleBreakdownChange(index, e)}
-                            required
-                          />
-                        </td>
-                        <td>
-                          <button
-                            type="button"
-                            className="btn btn-danger"
-                            onClick={() => {
-                              const newBreakdown = breakdown.filter((_, i) => i !== index);
-                              setBreakdown(newBreakdown);
-                            }}
-                          >
-                            Remove
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <button type="button" className="btn btn-secondary" onClick={addBreakdownRow}>
-                  Add Item
-                </button>
-              </div>
-
-              <div className="mb-3 d-flex justify-content-center">
-                <button
-                  type="submit"
-                  className="btn"
-                  style={{ backgroundColor: '#ff7e39', color: 'white' }}
-                >
-                  <BsFillFileArrowUpFill className="me-2" />
-                  Submit Proposal
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-white py-3 text-center">
-        <small>© 2024 CSE Department | All Rights Reserved</small>
-      </footer>
-    </div>
-  );
+    );
 };
 
 export default NewExpense;
