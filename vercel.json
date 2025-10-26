@@ -20,7 +20,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/Wad_FrontEnd/dist/index.html"
+      "destination": "/index.html" 
     }
   ]
 }
