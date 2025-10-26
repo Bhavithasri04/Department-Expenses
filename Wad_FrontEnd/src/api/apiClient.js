@@ -2,7 +2,9 @@ import axios from 'axios';
 
 // 1. Create a central place for your server's address.
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5000/api', // All requests will now automatically go here.
+  // Use a relative path for production, which works with Vercel rewrites.
+  // Use a full path for local development.
+  baseURL: import.meta.env.PROD ? '/api' : 'http://localhost:5000/api',
 });
 
 // 2. Automatically add the login token to every single request.

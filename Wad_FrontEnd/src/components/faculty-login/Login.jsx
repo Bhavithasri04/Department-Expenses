@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import logo from '../../assets/Images/slogo.png'; 
+import apiClient from '/src/api/apiClient.js';
 
 // Component renamed to "Login" for clarity
 function Login() { 
@@ -14,30 +15,23 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ employeeId, password }),
-      });
-  
-      const data = await response.json();
+      // Use apiClient, not fetch
+      const response = await apiClient.post('/auth/login', { employeeId, password });
 
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        
-        // This is the correct logic for redirection
-        if (data.forcePasswordChange) {
-          navigate('/force-change-password');
-        } else if (data.role === 'Admin') {
-          navigate('/admin-dashboard'); // Redirect Admin
-        } else {
-          navigate('/faculty-dashboard'); // Redirect Faculty
-        }
+      const data = response.data; // Data is directly on response.data with axios
+      localStorage.setItem('token', data.token);
+
+      if (data.forcePasswordChange) {
+        navigate('/force-change-password');
+      } else if (data.role === 'Admin') {
+        navigate('/admin-dashboard');
       } else {
-        alert(data.message || 'Invalid credentials.');
+        navigate('/faculty-dashboard');
       }
+
     } catch (error) {
-      alert('Error during login. Please check the server connection.');
+      // Axios errors are different from fetch
+      alert(error.response?.data?.message || 'Error during login. Please check the server connection.');
     }
   };
 

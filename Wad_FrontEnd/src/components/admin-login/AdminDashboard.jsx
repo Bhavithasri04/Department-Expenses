@@ -5,6 +5,8 @@ import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import AdminLayout from './AdminLayout';
 import './AdminDashboard.css';
+import apiClient from '/src/api/apiClient.js';
+
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
@@ -21,13 +23,11 @@ const AdminDashboard = () => {
         const fetchDashboardData = async () => {
             setLoading(true);
             try {
-                const token = localStorage.getItem('token');
-                const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
                 const [yearRes, categoriesRes, allProposalsRes] = await Promise.all([
-                    axios.get('http://localhost:5000/api/budget/fiscal-year/current', authHeaders),
-                    axios.get('http://localhost:5000/api/budget/categories', authHeaders),
-                    axios.get('http://localhost:5000/api/events/proposals/all', authHeaders)
+                    apiClient.get('/budget/fiscal-year/current'),
+                    apiClient.get('/budget/categories'),
+                    apiClient.get('/events/proposals/all')
                 ]);
 
                 const allProposals = allProposalsRes.data;

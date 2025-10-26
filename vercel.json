@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "Wad_FrontEnd/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist" 
+      }
+    },
+    {
+      "src": "Wad_BackEnd/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/Wad_BackEnd/server.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/Wad_FrontEnd/dist/index.html"
+    }
+  ]
+}
