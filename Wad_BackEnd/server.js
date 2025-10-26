@@ -1,5 +1,3 @@
-// Wad_BackEnd/server.js
-
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -10,7 +8,7 @@ import authRoutes from './routes/auth.js';
 import eventRoutes from './routes/events.js';
 import budgetRoutes from './routes/budget.js';
 
-// --- This MUST be at the very top ---
+// Load environment variables
 dotenv.config();
 
 const app = express();
@@ -19,28 +17,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- CORRECTED API ROUTES ---
-// We tell the app to use the route files directly.
-// The security middleware is now correctly handled *inside* the route files, not here.
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/budget', budgetRoutes);
 
-
-// --- CORRECTED DATABASE CONNECTION ---
-const PORT = process.env.PORT || 5000;
+// --- DATABASE CONNECTION ---
+// Connect to MongoDB
 const MONGO_URI = process.env.MONGO_URI;
 
 if (!MONGO_URI) {
-    console.error("FATAL ERROR: MONGO_URI is not defined in your .env file.");
-    process.exit(1);
+    console.error("FATAL ERROR: MONGO_URI is not defined.");
+} else {
+    mongoose.connect(MONGO_URI)
+        .then(() => console.log("MongoDB Connected"))
+        .catch((error) => console.error('MongoDB connection error:', error.message));
 }
 
-// The deprecated options have been removed for a clean connection.
-mongoose.connect(MONGO_URI)
-    .then(() => {
-        app.listen(PORT, () => console.log(`Server is running successfully on port: ${PORT}`));
-    })
-    .catch((error) => {
-        console.error('MongoDB connection error:', error.message);
-    });
+// --- EXPORT THE APP ---
+// This is the most important change for Vercel
+export default app;
