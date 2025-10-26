@@ -19,8 +19,13 @@
       "destination": "/Wad_BackEnd/server.js"
     },
     {
+      "source": "/assets/(.*)",
+      "destination": "/Wad_FrontEnd/assets/$1"
+    },
+    {
       "source": "/(.*)",
-      "destination": "/index.html" 
+      "destination": "/Wad_FrontEnd/index.html"
     }
   ]
+ 
 }
